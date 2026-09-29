@@ -39,7 +39,11 @@ def auth() -> Store:
     if not url or not key:
         st.error("Connexion Supabase à configurer : SUPABASE_URL et SUPABASE_PUBLISHABLE_KEY.")
         st.stop()
-    db = client()  # Never share a mutable auth client across Streamlit sessions.
+    try:
+        db = client()  # Never share a mutable auth client across Streamlit sessions.
+    except Exception as exc:
+        message(exc)
+        st.stop()
     tokens = st.session_state.get("tokens")
     if tokens:
         try:
