@@ -8,16 +8,19 @@ from supabase import Client, create_client
 
 BUCKET = "brand-assets"
 TABLES = ("brand_profiles", "brand_colors", "brand_fonts", "brand_assets", "design_templates", "contents", "slides", "ideas")
+DEFAULT_URL = "https://konervrdmmvbxadkgogv.supabase.co"
+# Publishable keys are designed for public clients. Authorization lives in RLS.
+DEFAULT_PUBLISHABLE_KEY = "sb_publishable_xm2okRBMCEfP_PCNiiezaw_HMSk2_Nh"
 
 
 def config() -> tuple[str, str]:
     import streamlit as st
     try:
-        url = st.secrets.get("SUPABASE_URL", os.getenv("SUPABASE_URL", ""))
-        key = st.secrets.get("SUPABASE_PUBLISHABLE_KEY", os.getenv("SUPABASE_PUBLISHABLE_KEY", ""))
+        url = st.secrets.get("SUPABASE_URL", os.getenv("SUPABASE_URL", DEFAULT_URL))
+        key = st.secrets.get("SUPABASE_PUBLISHABLE_KEY", os.getenv("SUPABASE_PUBLISHABLE_KEY", DEFAULT_PUBLISHABLE_KEY))
     except Exception:
-        url = os.getenv("SUPABASE_URL", "")
-        key = os.getenv("SUPABASE_PUBLISHABLE_KEY", "")
+        url = os.getenv("SUPABASE_URL", DEFAULT_URL)
+        key = os.getenv("SUPABASE_PUBLISHABLE_KEY", DEFAULT_PUBLISHABLE_KEY)
     return url, key
 
 

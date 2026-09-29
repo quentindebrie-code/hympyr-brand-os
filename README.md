@@ -15,17 +15,16 @@ Les modèles source SVG/PDF sont conservés et téléchargeables. Leur conversio
 
 ## Mise en place Supabase
 
-1. Créer un projet Supabase dans l'organisation et la région souhaitées.
-2. Exécuter `supabase/migrations/20260929160000_brand_os.sql` dans l'éditeur SQL du projet. La migration crée les tables, index, politiques RLS et le bucket privé `brand-assets`.
-3. Mettre l'URL du projet et la clé **publishable** dans les secrets Streamlit (jamais la clé `service_role`) :
+Le projet `hympyr-brand-os` est créé dans `quentindebrie-code's Org`, en région Paris (`eu-west-3`). Les migrations `supabase/migrations/20260929150605_brand_os.sql` et `20260929150758_add_foreign_key_indexes.sql` y sont appliquées. Elles créent les tables, index, politiques RLS et le bucket privé `brand-assets`.
+
+La clé **publishable** et l'URL de ce projet sont dans `store.py` ; elles peuvent être incluses dans un client public, puisque chaque opération sur les données est protégée par Supabase Auth et RLS. Ne jamais ajouter de clé `service_role` au dépôt. Pour pointer vers un autre projet, remplacez ces paramètres par les secrets Streamlit :
 
 ```toml
 SUPABASE_URL = "https://<project-ref>.supabase.co"
 SUPABASE_PUBLISHABLE_KEY = "sb_publishable_..."
 ```
 
-4. Configurer les paramètres Supabase Auth (confirmation d'e-mail, domaine de redirection et politique d'inscription) selon les utilisateurs qui doivent accéder à l'outil.
-5. Déployer `app.py` sur Streamlit Community Cloud ou lancer localement :
+Configurez les paramètres Supabase Auth (confirmation d'e-mail, domaine de redirection et politique d'inscription) selon les utilisateurs qui doivent accéder à l'outil. Déployez `app.py` sur Streamlit Community Cloud ou lancez localement :
 
 ```bash
 python -m venv .venv

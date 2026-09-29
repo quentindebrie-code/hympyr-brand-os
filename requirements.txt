@@ -46,6 +46,7 @@ httptools==0.8.0
     # via streamlit
 httpx==0.28.1
     # via
+    #   -r requirements.in
     #   postgrest
     #   storage3
     #   supabase
@@ -135,6 +136,8 @@ rpds-py==2026.6.3
     #   referencing
 six==1.17.0
     # via python-dateutil
+socksio==1.0.0
+    # via httpx
 starlette==1.7.0
     # via streamlit
 storage3==2.31.0
