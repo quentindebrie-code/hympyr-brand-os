@@ -1,54 +1,57 @@
 # Hympyr Brand OS
 
-Application Streamlit autonome construite à partir de la charte graphique Hympyr Energies `HYM-CHG-001`, version `0.1` du 27 juillet 2026.
+Studio Streamlit pour gérer l'identité de marque et produire des visuels à partir de gabarits modifiables. Le projet remplace les données locales SQLite par Supabase Auth, Postgres et Storage. Les fichiers, contenus et ressources de chaque compte sont isolés par des règles RLS.
 
-## Fonctions incluses
+## Ce que l'on peut faire
 
-- tableau de bord ;
-- ADN de marque avec distinction entre informations documentées et éléments à valider ;
-- charte interactive : logo, couleurs, typographie et contrôle WCAG ;
-- bibliothèque des gabarits décrits dans la charte ;
-- studio de contenu sans génération de faits non fournis ;
-- calendrier éditorial ;
-- banque d'idées ;
-- grille de conformité ;
-- export JSON des données ;
-- protection facultative par mot de passe.
+- Modifier, ajouter ou retirer couleurs et familles Google Fonts ; les couleurs sont appelées par token dans les gabarits.
+- Importer les logos, images et modèles sources (SVG, PDF compris), créer des fichiers texte/Markdown/HTML et les conserver dans Storage.
+- Créer un gabarit de 200 à 4 000 px avec calques texte, formes et images ; importer un PNG/JPEG/WebP en fond et superposer des champs éditables.
+- Écrire un contenu et une suite de diapositives, changer de gabarit, prévisualiser et exporter en PNG, ZIP de PNG ou PDF multipage.
+- Planifier les contenus, gérer les idées et exporter les métadonnées JSON ou le calendrier CSV.
+- Importer une sauvegarde JSON de la V1 si l'espace de contenus et d'idées est vide.
 
-## Lancement local
+Les modèles source SVG/PDF sont conservés et téléchargeables. Leur conversion en gabarit éditable passe actuellement par une image de fond PNG/JPEG/WebP et des calques configurés dans l'outil. Pour un rendu de logo dans le visuel, importez une version PNG/WebP transparente. Le rendu Google Fonts requiert l'accès à fonts.googleapis.com et fonts.gstatic.com ; une police de substitution est signalée quand le téléchargement échoue.
+
+## Mise en place Supabase
+
+1. Créer un projet Supabase dans l'organisation et la région souhaitées.
+2. Exécuter `supabase/migrations/20260929160000_brand_os.sql` dans l'éditeur SQL du projet. La migration crée les tables, index, politiques RLS et le bucket privé `brand-assets`.
+3. Mettre l'URL du projet et la clé **publishable** dans les secrets Streamlit (jamais la clé `service_role`) :
+
+```toml
+SUPABASE_URL = "https://<project-ref>.supabase.co"
+SUPABASE_PUBLISHABLE_KEY = "sb_publishable_..."
+```
+
+4. Configurer les paramètres Supabase Auth (confirmation d'e-mail, domaine de redirection et politique d'inscription) selon les utilisateurs qui doivent accéder à l'outil.
+5. Déployer `app.py` sur Streamlit Community Cloud ou lancer localement :
 
 ```bash
 python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-streamlit run app.py
+.venv/bin/pip install -r requirements.txt
+.venv/bin/streamlit run app.py
 ```
 
-## Déploiement Streamlit Community Cloud
+La base et les fichiers sont persistants dans Supabase. Le serveur Streamlit ne conserve que la session de l'utilisateur et les aperçus en cours d'édition ; enregistrez les modifications avant de fermer l'onglet. Un compte neuf reçoit la palette et le premier gabarit Hympyr une seule fois. Les autres comptes sont isolés : cette version ne partage pas un espace commun entre utilisateurs.
 
-1. Décompresser le livrable et publier son contenu dans un dépôt GitHub.
-2. Créer l'application dans Streamlit Community Cloud.
-3. Choisir `app.py` comme **Main file path**.
-4. Déployer.
+## Architecture
 
-Pour protéger l'application, ajouter dans les secrets Streamlit :
+- `app.py` : interface et parcours de création ;
+- `store.py` : accès aux tables, stockage et initialisation du compte ;
+- `rendering.py` : rendu de gabarits en images et PDF, ajustement du texte ;
+- `supabase/migrations/` : structure SQL et règles de sécurité ;
+- `tests/` : vérification des rendus et exports.
 
-```toml
-APP_PASSWORD = "un-mot-de-passe-fort"
+Les gabarits sont enregistrés comme JSON de calques. Les champs (`title`, `body`, `cta` ou vos propres noms) sont remplis pour chaque diapositive ; les couleurs par token sont relues à chaque rendu. Les positions, tailles et dimensions sont en pixels. Une couleur ou une variante typographique utilisée dans un gabarit doit être remplacée dans le gabarit avant sa suppression.
+
+## Reprendre les données de la V1
+
+Dans l'ancienne application, téléchargez **Administration → Exporter toutes les données**, puis utilisez **Administration → Importer un export de la V1** dans cette version. Les anciens contenus et idées sont copiés ; chaque contenu reçoit une première diapositive brouillon. La V1 ne sauvegardait aucun fichier de marque dans sa base. Aucun fichier local `data/brand_os.db` n'est présent dans le dépôt GitHub.
+
+## Vérification locale
+
+```bash
+.venv/bin/python -m unittest discover -s tests -v
+.venv/bin/python -m py_compile app.py store.py rendering.py
 ```
-
-Ne jamais inscrire un mot de passe, une clé API ou une donnée sensible directement dans `app.py`.
-
-## Données
-
-La V1 enregistre les idées et contenus dans `data/brand_os.db`. Le stockage local de Streamlit Community Cloud peut être réinitialisé lors d'un redéploiement. L'écran **Administration** permet donc d'exporter une sauvegarde JSON.
-
-Une base PostgreSQL pourra remplacer SQLite dans une version ultérieure si une conservation permanente et multi-utilisateur est nécessaire.
-
-## Sources et limites
-
-- Les données graphiques sont directement intégrées dans `app.py` : l'application ne dépend d'aucun fichier `brand.yml`.
-- Le PDF source est conservé dans `reference/charte_graphique_hympyr.pdf` et peut être téléchargé depuis l'application.
-- Les fichiers vectoriels officiels du logo n'ont pas été fournis. L'application ne recrée donc pas le logo et ne distribue pas de faux fichier source.
-- Les conversions CMJN sont reproduites comme indicatives, conformément à la charte.
-- La plateforme de marque reste partielle tant que la mission, la vision, les valeurs, les audiences et les preuves commerciales n'ont pas été validées.
