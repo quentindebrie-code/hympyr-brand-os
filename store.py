@@ -4,7 +4,7 @@ from __future__ import annotations
 import os
 from uuid import uuid4
 
-from supabase import Client, create_client
+from typing import Any
 
 BUCKET = "brand-assets"
 TABLES = ("brand_profiles", "brand_colors", "brand_fonts", "brand_assets", "design_templates", "contents", "slides", "ideas")
@@ -24,15 +24,19 @@ def config() -> tuple[str, str]:
     return url, key
 
 
-def client() -> Client:
+def client() -> Any:
     url, key = config()
     if not url or not key:
         raise RuntimeError("Renseignez SUPABASE_URL et SUPABASE_PUBLISHABLE_KEY dans les secrets de l'application.")
+    try:
+        from supabase import create_client
+    except ImportError as exc:
+        raise RuntimeError("La dépendance Supabase n'est pas installée dans l'environnement Streamlit. Vérifiez le journal de déploiement et requirements.txt.") from exc
     return create_client(url, key)
 
 
 class Store:
-    def __init__(self, db: Client, user_id: str):
+    def __init__(self, db: Any, user_id: str):
         self.db, self.user_id = db, user_id
 
     def list(self, table: str, order: str = "created_at", descending: bool = True) -> list[dict]:
