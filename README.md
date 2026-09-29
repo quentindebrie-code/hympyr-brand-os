@@ -32,6 +32,8 @@ python -m venv .venv
 .venv/bin/streamlit run app.py
 ```
 
+Le fichier `requirements.txt` est verrouillé avec `uv pip compile --python-version 3.10 requirements.in -o requirements.txt` afin de rester installable sur les anciennes applications Streamlit Cloud encore sous Python 3.10 ou 3.11.
+
 La base et les fichiers sont persistants dans Supabase. Le serveur Streamlit ne conserve que la session de l'utilisateur et les aperçus en cours d'édition ; enregistrez les modifications avant de fermer l'onglet. Un compte neuf reçoit la palette et le premier gabarit Hympyr une seule fois. Les autres comptes sont isolés : cette version ne partage pas un espace commun entre utilisateurs.
 
 ## Architecture
